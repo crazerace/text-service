@@ -5,7 +5,7 @@ from typing import List, Optional
 from crazerace.http.instrumentation import trace
 
 # Internal modules
-from app.models import Language, TranslatedText, Group
+from app.models import TranslatedText, TextGroup, Group
 
 
 @trace("text_repo")
@@ -14,3 +14,15 @@ def find_by_key(key: str, language: str) -> Optional[TranslatedText]:
         TranslatedText.key == key, TranslatedText.language == language
     ).first()
 
+
+@trace("text_repo")
+def find_by_keys(keys: List[str], language: str) -> List[TranslatedText]:
+    return TranslatedText.query.filter(
+        TranslatedText.key.in_(keys),  # type: ignore
+        TranslatedText.language == language,
+    ).all()
+
+
+@trace("text_repo")
+def find_group(group_id) -> Optional[Group]:
+    return Group.query.filter(Group.id == group_id).first()

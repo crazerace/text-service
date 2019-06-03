@@ -7,7 +7,7 @@ from crazerace.http import status
 
 # Intenal modules
 from tests import TestEnvironment, JSON, headers, new_id
-from app.models import TranslatedText, Language
+from app.models import TranslatedText, Language, Group, TextGroup
 
 
 def test_get_text():
@@ -49,3 +49,56 @@ def test_get_text():
         )
         assert res_wrong_lang.status_code == status.HTTP_400_BAD_REQUEST
 
+
+def test_get_text_by_group():
+    items = [
+        Language(id="sv"),
+        Language(id="en"),
+        TranslatedText(key="TEST_TEXT_KEY", language="sv", value="sv-text-val"),
+        TranslatedText(key="TEST_TEXT_KEY", language="en", value="en-text-val"),
+        TranslatedText(key="OTHER_TEXT_KEY", language="sv", value="sv-other-val"),
+        TranslatedText(key="OTHER_TEXT_KEY", language="en", value="en-other-val"),
+        TranslatedText(key="NOT_IN_GROUP", language="sv", value="sv-other-val"),
+        TranslatedText(key="NOT_IN_GROUP", language="en", value="en-other-val"),
+        TranslatedText(key="ONLY_SV_TEXT_KEY", language="sv", value="sv-only-val"),
+        Group(id="MOBILE_APP"),
+        TextGroup(text_key="TEST_TEXT_KEY", group_id="MOBILE_APP"),
+        TextGroup(text_key="OTHER_TEXT_KEY", group_id="MOBILE_APP"),
+        TextGroup(text_key="ONLY_SV_TEXT_KEY", group_id="MOBILE_APP"),
+    ]
+
+    with TestEnvironment(items) as client:
+        res_unauthorized = client.get("/v1/texts/group/MOBILE_APP")
+        assert res_unauthorized.status_code == status.HTTP_401_UNAUTHORIZED
+
+        sv_headers_ok = headers(new_id(), language="sv")
+        res_sv = client.get("/v1/texts/group/MOBILE_APP", headers=sv_headers_ok)
+        assert res_sv.status_code == status.HTTP_200_OK
+        body = res_sv.get_json()
+        assert len(body) == 3
+        assert body["TEST_TEXT_KEY"] == "sv-text-val"
+        assert body["OTHER_TEXT_KEY"] == "sv-other-val"
+        assert body["ONLY_SV_TEXT_KEY"] == "sv-only-val"
+
+        no_lang_headers = headers(new_id(), language=None)
+        res_no_lang = client.get("/v1/texts/group/MOBILE_APP", headers=no_lang_headers)
+        assert res_no_lang.status_code == status.HTTP_400_BAD_REQUEST
+
+        en_headers = headers(new_id(), language="en")
+        res_missing = client.get("/v1/texts/group/MISSING_GROUP", headers=en_headers)
+        assert res_missing.status_code == status.HTTP_404_NOT_FOUND
+
+        wrong_lang_headers = headers(new_id(), language="xy")
+        res_wrong_lang = client.get(
+            "/v1/texts/group/MOBILE_APP", headers=wrong_lang_headers
+        )
+        assert res_wrong_lang.status_code == status.HTTP_400_BAD_REQUEST
+
+        en_headers_ok = headers(new_id(), language="en")
+        res_en = client.get("/v1/texts/group/MOBILE_APP", headers=en_headers_ok)
+        assert res_en.status_code == status.HTTP_200_OK
+        body = res_en.get_json()
+        assert len(body) == 3
+        assert body["TEST_TEXT_KEY"] == "en-text-val"
+        assert body["OTHER_TEXT_KEY"] == "en-other-val"
+        assert body["ONLY_SV_TEXT_KEY"] == None

@@ -25,8 +25,9 @@ def get_text_by_key(key: str) -> flask.Response:
 
 
 @trace("controller")
-def get_text_group(key: str) -> flask.Response:
-    return http.create_ok_response()
+def get_text_group(group_id: str) -> flask.Response:
+    texts = text_service.get_text_by_group(group_id, _get_language())
+    return http.create_response(texts)
 
 
 @trace("controller")
