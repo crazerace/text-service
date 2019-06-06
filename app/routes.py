@@ -9,13 +9,11 @@ from app import controller
 
 
 @app.route("/v1/texts/key/<key>", methods=["GET"])
-@secured(JWT_SECRET)
 def get_text(key: str) -> flask.Response:
     return controller.get_text_by_key(key)
 
 
 @app.route("/v1/texts/group/<group_id>", methods=["GET"])
-@secured(JWT_SECRET)
 def get_text_group(group_id: str) -> flask.Response:
     return controller.get_text_group(group_id)
 

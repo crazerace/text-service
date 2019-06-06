@@ -33,6 +33,13 @@ def headers(user_id: str, language: Optional[str], role: str = "USER") -> Dict[s
     return h
 
 
+def unauth_headers(language: Optional[str]) -> Dict[str, str]:
+    h = {"Accepted": JSON, "Content-Type": JSON}
+    if language:
+        h[LANGUAGE_HEADER] = language
+    return h
+
+
 class TestEnvironment:
     def __init__(self, items: List[db.Model] = []) -> None:
         self.client = app.test_client()

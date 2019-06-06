@@ -6,7 +6,7 @@ from datetime import datetime
 from crazerace.http import status
 
 # Intenal modules
-from tests import TestEnvironment, JSON, headers, new_id
+from tests import TestEnvironment, JSON, unauth_headers, new_id
 from app.models import TranslatedText, Language, Group, TextGroup
 
 
@@ -22,28 +22,25 @@ def test_get_text():
     ]
 
     with TestEnvironment(items) as client:
-        res_unauthorized = client.get("/v1/texts/key/TEST_TEXT_KEY")
-        assert res_unauthorized.status_code == status.HTTP_401_UNAUTHORIZED
-
-        sv_headers_ok = headers(new_id(), language="sv")
+        sv_headers_ok = unauth_headers(language="sv")
         res_sv = client.get("/v1/texts/key/TEST_TEXT_KEY", headers=sv_headers_ok)
         assert res_sv.status_code == status.HTTP_200_OK
         assert res_sv.get_json()["TEST_TEXT_KEY"] == "sv-text-val"
 
-        en_headers_ok = headers(new_id(), language="en")
+        en_headers_ok = unauth_headers(language="en")
         res_en = client.get("/v1/texts/key/TEST_TEXT_KEY", headers=en_headers_ok)
         assert res_en.status_code == status.HTTP_200_OK
         assert res_en.get_json()["TEST_TEXT_KEY"] == "en-text-val"
 
-        no_lang_headers = headers(new_id(), language=None)
+        no_lang_headers = unauth_headers(language=None)
         res_no_lang = client.get("/v1/texts/key/TEST_TEXT_KEY", headers=no_lang_headers)
         assert res_no_lang.status_code == status.HTTP_400_BAD_REQUEST
 
-        en_headers = headers(new_id(), language="en")
+        en_headers = unauth_headers(language="en")
         res_missing = client.get("/v1/texts/key/ONLY_SV_TEXT_KEY", headers=en_headers)
         assert res_missing.status_code == status.HTTP_404_NOT_FOUND
 
-        wrong_lang_headers = headers(new_id(), language="xy")
+        wrong_lang_headers = unauth_headers(language="xy")
         res_wrong_lang = client.get(
             "/v1/texts/key/TEST_TEXT_KEY", headers=wrong_lang_headers
         )
@@ -68,10 +65,7 @@ def test_get_text_by_group():
     ]
 
     with TestEnvironment(items) as client:
-        res_unauthorized = client.get("/v1/texts/group/MOBILE_APP")
-        assert res_unauthorized.status_code == status.HTTP_401_UNAUTHORIZED
-
-        sv_headers_ok = headers(new_id(), language="sv")
+        sv_headers_ok = unauth_headers(language="sv")
         res_sv = client.get("/v1/texts/group/MOBILE_APP", headers=sv_headers_ok)
         assert res_sv.status_code == status.HTTP_200_OK
         body = res_sv.get_json()
@@ -80,21 +74,21 @@ def test_get_text_by_group():
         assert body["OTHER_TEXT_KEY"] == "sv-other-val"
         assert body["ONLY_SV_TEXT_KEY"] == "sv-only-val"
 
-        no_lang_headers = headers(new_id(), language=None)
+        no_lang_headers = unauth_headers(language=None)
         res_no_lang = client.get("/v1/texts/group/MOBILE_APP", headers=no_lang_headers)
         assert res_no_lang.status_code == status.HTTP_400_BAD_REQUEST
 
-        en_headers = headers(new_id(), language="en")
+        en_headers = unauth_headers(language="en")
         res_missing = client.get("/v1/texts/group/MISSING_GROUP", headers=en_headers)
         assert res_missing.status_code == status.HTTP_404_NOT_FOUND
 
-        wrong_lang_headers = headers(new_id(), language="xy")
+        wrong_lang_headers = unauth_headers(language="xy")
         res_wrong_lang = client.get(
             "/v1/texts/group/MOBILE_APP", headers=wrong_lang_headers
         )
         assert res_wrong_lang.status_code == status.HTTP_400_BAD_REQUEST
 
-        en_headers_ok = headers(new_id(), language="en")
+        en_headers_ok = unauth_headers(language="en")
         res_en = client.get("/v1/texts/group/MOBILE_APP", headers=en_headers_ok)
         assert res_en.status_code == status.HTTP_200_OK
         body = res_en.get_json()
