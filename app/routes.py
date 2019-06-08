@@ -4,7 +4,6 @@ from crazerace.http.security import secured
 
 # Internal modules
 from app import app
-from app.config import JWT_SECRET
 from app import controller
 
 
