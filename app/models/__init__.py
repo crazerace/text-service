@@ -15,6 +15,7 @@ class Language(db.Model):  # type: ignore
 
 
 class TranslatedText(db.Model):  # type: ignore
+    __table_args__ = (db.UniqueConstraint("key", "language", name="unique_key_language"),)
     id: int = db.Column(db.Integer, primary_key=True)
     key: str = db.Column(db.String(255), nullable=False)
     language: str = db.Column(db.String(2), db.ForeignKey("language.id"), nullable=True)
@@ -40,9 +41,7 @@ class TextGroup(db.Model):  # type: ignore
         db.UniqueConstraint("text_key", "group_id", name="unique_text_key_group_id"),
     )
     id: int = db.Column(db.Integer, primary_key=True)
-    text_key: int = db.Column(
-        db.String(255), db.ForeignKey("translated_text.key"), nullable=False
-    )
+    text_key: int = db.Column(db.String(255), nullable=False)
     group_id: int = db.Column(db.String(255), db.ForeignKey("group.id"), nullable=False)
     created_at: datetime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
