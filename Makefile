@@ -11,6 +11,9 @@ test:
 run-local:
 	sh start-local.sh
 
+image:
+	sh build-image.sh
+
 db-init:
 	rm -rf migrations
 	flask db init
