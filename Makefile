@@ -1,8 +1,8 @@
-export DB_USERNAME=gameservice
+export DB_USERNAME=textservice
 export DB_PASSWORD=password
-export DB_HOST=127.0.1
+export DB_HOST=127.0.0.1
 export DB_PORT=5432
-export DB_DATABASE=gameservice
+export DB_DATABASE=texts
 
 
 test:
