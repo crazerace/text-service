@@ -17,14 +17,14 @@ from crazerace.http.error import RequestError, NotFoundError, MethodNotAllowedEr
 
 # Internal modules
 from app.config import AppConfig
-from app.config import REQUEST_ID_HEADER, SERVICE_NAME, SERVER_NAME
+from app.config import REQUEST_ID_HEADER, SERVICE_NAME, SERVICE_VERSION
 
 
 app = Flask(SERVICE_NAME)
 app.config.from_object(AppConfig)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-setup_instrumentation(app)
+setup_instrumentation(app, name=SERVICE_NAME, version=SERVICE_VERSION)
 
 
 from app import routes
