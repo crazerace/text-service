@@ -17,7 +17,7 @@ def test_get_health_success():
 
 
 def test_get_health_fail():
-    with patch("app.service.health._db_connected", return_value=("DOWN", False)):
+    with patch("app.db.engine.execute", side_effect=Exception("mock fail")):
         with TestEnvironment() as client:
             res = client.get("/health", content_type=JSON)
             assert res.status_code == status.HTTP_503_SERVICE_UNAVAILIBLE
